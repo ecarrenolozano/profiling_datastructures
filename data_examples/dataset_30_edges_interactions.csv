@@ -1,0 +1,48 @@
+Relationship ID,Source ID,Target ID,label,properties
+,B6V6V7,H9R6K5,interacts_with,{'source': 'signor'}
+,B6V6V7,I5X3I2,interacts_with,{'method': 'Lorem ipsum pblfc'}
+,385603,H9R6K5,interacts_with,"{'source': 'intact', 'method': 'Lorem ipsum nbqvj'}"
+,385603,I9A3P8,interacts_with,{}
+,L3V2Y6,X0C9T5,interacts_with,"{'source': 'intact', 'method': 'Lorem ipsum zwhrq'}"
+intact956331,L3V2Y6,Y8Y3K0,interacts_with,{'source': 'signor'}
+intact337768,L3V2Y6,I5X3I2,interacts_with,{'method': 'Lorem ipsum hfvlp'}
+,Q1R3N5,I0S4T8,interacts_with,{}
+intact260500,Q1R3N5,H0U9R4,interacts_with,{'source': 'intact'}
+,249853,G0P1I0,interacts_with,"{'source': 'intact', 'method': 'Lorem ipsum lsbdz'}"
+intact82265,249853,H1M7P2,interacts_with,{'method': 'Lorem ipsum qsult'}
+,249853,D4X6C4,interacts_with,"{'source': 'signor', 'method': 'Lorem ipsum rlyhh'}"
+,249853,999852,interacts_with,"{'source': 'signor', 'method': 'Lorem ipsum ulkku'}"
+intact205562,249853,P8X2R8,interacts_with,{}
+,X0C9T5,535278,interacts_with,{'source': 'signor'}
+,535278,447972,interacts_with,"{'source': 'intact', 'method': 'Lorem ipsum ficmx'}"
+intact357405,D8O4Y7,L3V2Y6,interacts_with,{}
+intact538978,I0S4T8,C8W4F0,interacts_with,{}
+intact556444,447972,H0U9R4,interacts_with,"{'source': 'intact', 'method': 'Lorem ipsum jkoie'}"
+,H0U9R4,Q1R3N5,interacts_with,{'source': 'signor'}
+,H0U9R4,C8W4F0,interacts_with,{}
+,H1M7P2,373262,interacts_with,"{'source': 'signor', 'method': 'Lorem ipsum jmzhj'}"
+intact631800,H1M7P2,189306,interacts_with,{'method': 'Lorem ipsum iqlma'}
+intact277910,H9R6K5,E8I0O8,interacts_with,{}
+,189306,H9R6K5,interacts_with,{}
+intact608806,189306,C8W4F0,interacts_with,"{'source': 'intact', 'method': 'Lorem ipsum raxbi'}"
+intact405378,D4X6C4,I0S4T8,interacts_with,"{'source': 'signor', 'method': 'Lorem ipsum xafpj'}"
+intact694086,D4X6C4,H0U9R4,interacts_with,{}
+intact446811,D4X6C4,H1M7P2,interacts_with,{'source': 'signor'}
+intact850890,D4X6C4,D5V7Y7,interacts_with,{}
+intact859346,D4X6C4,U9P9L6,interacts_with,{'method': 'Lorem ipsum ygxkg'}
+intact51967,D5V7Y7,H1M7P2,interacts_with,{'source': 'signor'}
+,P8X2R8,T9Z8Y0,interacts_with,{'source': 'signor'}
+,I5X3I2,D4X6C4,interacts_with,"{'source': 'intact', 'method': 'Lorem ipsum iiozd'}"
+intact994853,I5X3I2,T9Z8Y0,interacts_with,{'method': 'Lorem ipsum gconp'}
+intact419487,792512,L3V2Y6,interacts_with,{}
+intact180399,792512,H0U9R4,interacts_with,{'source': 'signor'}
+,I9A3P8,L3V2Y6,interacts_with,{'source': 'intact'}
+intact812038,I9A3P8,373262,interacts_with,{}
+,C8W4F0,H9R6K5,interacts_with,{'method': 'Lorem ipsum wwkkw'}
+intact898671,C8W4F0,D5V7Y7,interacts_with,"{'source': 'signor', 'method': 'Lorem ipsum cdcxn'}"
+,C8W4F0,I9A3P8,interacts_with,"{'source': 'signor', 'method': 'Lorem ipsum lyrwo'}"
+,559407,385603,interacts_with,{'source': 'signor'}
+,559407,I0S4T8,interacts_with,{'method': 'Lorem ipsum nvdex'}
+intact795446,U9P9L6,X0C9T5,interacts_with,{'method': 'Lorem ipsum bxjad'}
+intact620870,449383,L3V2Y6,interacts_with,{'method': 'Lorem ipsum qhpxd'}
+,449383,T9Z8Y0,interacts_with,{'source': 'intact'}

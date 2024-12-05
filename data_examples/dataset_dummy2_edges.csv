@@ -1,0 +1,7 @@
+ID,source,target,label,properties
+E1,A,1,is_equivalent,"{'info': 'A is equal to 1', 'mass=': 1}"
+E2,B,2,is_equivalent,"{'info': 'B is equal to 2', 'mass=': 2}"
+E3,C,3,is_equivalent,"{'info': 'C is equal to 3', 'mass=': 3}"
+R1,B,A,follows,"{'info': 'B follows A', 'mass=': 1.0}"
+R2,C,B,follows,"{'info': 'C follows B', 'mass=': 2.0}"
+R3,C,A,follows,"{'info': 'C follows A', 'mass=': 3.0}"

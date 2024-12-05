@@ -1,0 +1,7 @@
+ID,label,properties
+A,letters,"{'alphabet': 'latin', 'equivalent':'a'}"
+B,letters,"{'alphabet': 'latin', 'equivalent':'b'}"
+C,letters,"{'alphabet': 'latin', 'equivalent':'c'}"
+1,numbers,"{'mathset':'integer', 'name':'one'}"
+2,numbers,"{'mathset':'integer', 'name':'two'}"
+3,numbers,"{'mathset':'integer', 'name':'three'}"
