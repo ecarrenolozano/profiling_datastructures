@@ -1,3 +1,4 @@
+memray~=1.15
 networkx~=2.8.8
 pandas~=2.2.3
 pympler~=1.1
