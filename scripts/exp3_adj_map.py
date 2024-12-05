@@ -48,8 +48,8 @@ def main():
     # file_name_edges = "dataset_dummy2_edges.csv"
     # file_name_nodes = "dataset_dummy2_nodes.csv"
 
-    file_name_edges = "dataset_6000_edges_interactions.csv"
-    file_name_nodes = "dataset_6000_nodes_proteins.csv"
+    file_name_edges = "dataset_30_edges_interactions.csv"
+    file_name_nodes = "dataset_30_nodes_proteins.csv"
 
     file_path_edges = os.path.join(FILE_PATH_DATASETS, file_name_edges)
     file_path_nodes = os.path.join(FILE_PATH_DATASETS, file_name_nodes)
