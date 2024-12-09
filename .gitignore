@@ -1,0 +1,10 @@
+# Ignore everything in the folder, including subdirectories
+data_examples/*
+
+# Except these two specific files
+!data_examples/dataset_30_edges_interactions.csv
+!data_examples/dataset_30_nodes_proteins.csv
+!data_examples/dataset_dummy2_edges.csv
+!data_examples/dataset_dummy2_nodes.csv
+!data_examples/dataset_dummy_edges.csv
+!data_examples/dataset_dummy_nodes.csv
