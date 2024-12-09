@@ -1,0 +1,7 @@
+ID, source, target, label, properties
+r1, a, 1, equivalent, {"info": "equivalent a"}
+r2, b, 2, equivalent, {"info": "equivalent b"}
+r3, c, 3, equivalent, {"info": "equivalent c"}
+c1, a, b, connection, {"info": "connection between a and b"}
+c2, b, c, connection, {"info": "connection between b and c"}
+c3, a, c, connection, {"info": "connection between a and c"}
