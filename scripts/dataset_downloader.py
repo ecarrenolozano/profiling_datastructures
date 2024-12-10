@@ -43,7 +43,7 @@ def command_line_interface():
 
     detailed = cli_parser.add_argument_group("detailed output")
     detailed.add_argument("-x", "--extract-all", action="store_true")
-    detailed.add_argument("-d", "--delete-zip", action="store_false")
+    detailed.add_argument("-d", "--delete-zip", action="store_true")
 
     args = cli_parser.parse_args()
 
