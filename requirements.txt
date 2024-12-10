@@ -5,4 +5,6 @@ pympler~=1.1
 requests>=2.3
 tabulate==0.9
 tqdm~=4.67
+tqdm-stubs
+types-requests
 types-tabulate
