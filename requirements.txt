@@ -1,6 +1,7 @@
 memray~=1.15
-networkx~=2.8.8
+networkx~=3.0
 pandas~=2.2.3
+pre-commit
 pympler~=1.1
 pytest~=7.4
 requests>=2.3
