@@ -11,3 +11,9 @@ data_examples/*
 
 # Ignore .ipynb checkpoints
 notebooks/.ipynb_checkpoints
+
+# Ignore VS Code local configurations
+.vscode/settings.json
+
+# Notebooks
+notebooks/NB3_networkx_pandas_dataframe-1733750704571.ipynb
