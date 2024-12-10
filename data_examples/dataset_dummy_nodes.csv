@@ -1,4 +1,4 @@
-ID, label, properties
-a, letters, {"info": "node a"},
-b, letters, {"info": "node b"},
-c, letters, {"info": "node c"}
+ID,label,properties
+a,letters,"{"info": "node a"}",
+b,letters,"{"info": "node b"}",
+c,letters,"{"info": "node c"}"
