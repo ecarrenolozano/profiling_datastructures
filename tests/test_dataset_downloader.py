@@ -3,7 +3,7 @@ import subprocess
 
 # Test if the CLI can correctly read and handle a URL argument
 def test_cli_read_url():
-    # Simulate running the CLI application with a URL argument
+    """Test with a real and small zip file hosted online."""
     url_test = "https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-zip-file.zip"
     result = subprocess.run(
         [
