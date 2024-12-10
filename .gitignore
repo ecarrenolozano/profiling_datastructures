@@ -8,3 +8,6 @@ data_examples/*
 !data_examples/dataset_dummy2_nodes.csv
 !data_examples/dataset_dummy_edges.csv
 !data_examples/dataset_dummy_nodes.csv
+
+# Ignore .ipynb checkpoints
+notebooks/.ipynb_checkpoints
