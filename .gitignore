@@ -10,7 +10,10 @@ data_examples/*
 !data_examples/dataset_dummy_nodes.csv
 
 # Ignore .ipynb checkpoints
-notebooks/.ipynb_checkpoints
+notebooks/.ipynb_checkpoints/*
+
+# Ignore pytest caches
+tests/__pycache__/*
 
 # Ignore VS Code local configurations
 .vscode/settings.json
