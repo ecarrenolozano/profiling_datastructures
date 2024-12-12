@@ -214,8 +214,8 @@ if __name__ == "__main__":
     FILE_PATH_RESULTS = "../data_results"
 
     # MODIFY THIS: Dataset's name
-    filename_nodes = "dataset_30_nodes_proteins.csv"
-    filename_edges = "dataset_30_edges_interactions.csv"
+    filename_nodes = "dataset_3000_nodes_proteins.csv"
+    filename_edges = "dataset_3000_edges_interactions.csv"
 
     # MODIFY THIS: File paths
     file_path_nodes = os.path.join(FILE_PATH_DATASETS, filename_nodes)
@@ -226,7 +226,7 @@ if __name__ == "__main__":
     print_metadata(file_path_nodes, file_path_edges)
 
     # Define if you will profile the code with memray
-    memray_is_used = True
+    memray_is_used = False
 
     ###################     CODE UNDER TEST (START)     ########################
     if memray_is_used:
@@ -259,15 +259,17 @@ if __name__ == "__main__":
 
         # ==============       MEMORY STATS
         print("======   Memory profile")
-        pympler_profiler(nodes=nodes_dict, edges=edges_adjacency_map, integer=10)
+        pympler_profiler(
+            nodes=nodes_dict, edges=edges_adjacency_map, graph=graph, integer=10
+        )
 
-        print("\nExample raw node:")
-        slice_nodes = dict(islice(nodes_dict.items(), 1))
-        print(dumps(slice_nodes, indent=4))
+        # print("\nExample raw node:")
+        # slice_nodes = dict(islice(nodes_dict.items(), 1))
+        # print(dumps(slice_nodes, indent=4))
 
-        print("Example raw edges:")
-        slice_edges = dict(islice(edges_adjacency_map.items(), 1))
-        print(dumps(slice_edges, indent=4))
+        # print("Example raw edges:")
+        # slice_edges = dict(islice(edges_adjacency_map.items(), 1))
+        # print(dumps(slice_edges, indent=4))
 
         example_info_networkx_graph(graph)
 

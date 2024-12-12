@@ -197,8 +197,8 @@ if __name__ == "__main__":
     FILE_PATH_RESULTS = "../data_results"
 
     # MODIFY THIS: Dataset's name
-    filename_nodes = "dataset_3000_nodes_proteins.csv"
-    filename_edges = "dataset_3000_edges_interactions.csv"
+    filename_nodes = "dataset_30000_nodes_proteins.csv"
+    filename_edges = "dataset_30000_edges_interactions.csv"
 
     # MODIFY THIS: File paths
     file_path_nodes = os.path.join(FILE_PATH_DATASETS, filename_nodes)

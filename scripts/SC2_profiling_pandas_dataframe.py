@@ -146,21 +146,19 @@ def change_column_names(df, column_names_dict):
 
 
 def df_to_networkx_nodes(nodes_df, columns_to_keep_intact, column_names_dict):
-    nodes_df_transformed = (
+    return (
         nodes_df.pipe(row_to_dictionary, columns_to_keep_intact=columns_to_keep_intact)
         .pipe(merge_properties, column_to_keep="properties", column_to_merge="temp_dicts")
         .pipe(change_column_names, column_names_dict)
     )
-    return nodes_df_transformed
 
 
 def df_to_networkx_edges(edges_df, columns_to_keep_intact, column_names_dict):
-    edges_df_transformed = (
+    return (
         edges_df.pipe(row_to_dictionary, columns_to_keep_intact=columns_to_keep_intact)
         .pipe(merge_properties, "properties", "temp_dicts")
         .pipe(change_column_names, column_names_dict)
     )
-    return edges_df_transformed
 
 
 def networkx_graph_from_pandas(
@@ -174,7 +172,7 @@ def networkx_graph_from_pandas(
         pd.concat(
             [
                 networkx_edges_df[["source", "target"]],
-                networkx_edges_df["properties"],  # .map(literal_eval)
+                networkx_edges_df["properties"],
             ],
             axis=1,
         ).itertuples(index=False, name=None)
@@ -185,7 +183,7 @@ def networkx_graph_from_pandas(
         pd.concat(
             [
                 networkx_nodes_df["source"],
-                networkx_nodes_df["properties"],  # .map(literal_eval)
+                networkx_nodes_df["properties"],
             ],
             axis=1,
         ).itertuples(index=False, name=None)
@@ -238,12 +236,16 @@ if __name__ == "__main__":
     FILE_PATH_RESULTS = "../data_results"
 
     # MODIFY THIS: Dataset's name
-    filename_nodes = "dataset_30_nodes_proteins.csv"
-    filename_edges = "dataset_30_edges_interactions.csv"
+    filename_nodes = "dataset_300_nodes_proteins.csv"
+    filename_edges = "dataset_300_edges_interactions.csv"
 
     # MODIFY THIS: File paths
     file_path_nodes = os.path.join(FILE_PATH_DATASETS, filename_nodes)
     file_path_edges = os.path.join(FILE_PATH_DATASETS, filename_edges)
+
+    # ==============       DO NOT MODIFY THE REST OF THE CODE      ================
+    # print metadata related to this script
+    print_metadata(file_path_nodes, file_path_edges)
 
     # Define if you will profile the code with memray
     memray_is_used = True
@@ -281,7 +283,10 @@ if __name__ == "__main__":
 
         # ==============       MEMORY STATS
         print("======   Memory profile")
-        pympler_profiler(nodes=nodes_df, edges=edges_df, integer=10)
+        pympler_profiler(nodes=nodes_df, edges=edges_df, graph=graph, integer=10)
+
+        print(nodes_df.info(memory_usage="deep"))
+        print(edges_df.info(memory_usage="deep"))
 
         print("\nExample raw nodes:\n\t{}".format(nodes_df[0:1]))
         print("Example raw edges:\n\t{}".format(edges_df[0:1]))
