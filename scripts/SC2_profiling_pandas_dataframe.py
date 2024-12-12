@@ -1,13 +1,13 @@
-import ast
-import cProfile
-import csv
 import os
 import platform
 import pstats
+from ast import literal_eval
+from cProfile import Profile
+from csv import reader as csv_reader
 
-import memray
 import networkx as nx
 import pandas as pd
+from memray import Tracker as MemrayTracker
 from pympler import asizeof
 from tabulate import tabulate
 
@@ -100,7 +100,7 @@ def example_info_networkx_graph(graph):
 # =====================================================================
 def load_csv_generator(file_path, header=True):
     with open(file_path, "r") as file:
-        reader = csv.reader(file)
+        reader = csv_reader(file)
         if header:
             next(reader)
         for row in reader:
@@ -133,7 +133,7 @@ def row_to_dictionary(df, columns_to_keep_intact):
 
 def merge_properties(df, column_to_keep, column_to_merge):
 
-    df[column_to_keep] = df[column_to_keep].map(ast.literal_eval)
+    df[column_to_keep] = df[column_to_keep].map(literal_eval)
     df[column_to_keep] = [
         {**c1, **c2} for c1, c2 in zip(df[column_to_keep], df[column_to_merge])
     ]
@@ -174,7 +174,7 @@ def networkx_graph_from_pandas(
         pd.concat(
             [
                 networkx_edges_df[["source", "target"]],
-                networkx_edges_df["properties"],  # .map(ast.literal_eval)
+                networkx_edges_df["properties"],  # .map(literal_eval)
             ],
             axis=1,
         ).itertuples(index=False, name=None)
@@ -185,12 +185,43 @@ def networkx_graph_from_pandas(
         pd.concat(
             [
                 networkx_nodes_df["source"],
-                networkx_nodes_df["properties"],  # .map(ast.literal_eval)
+                networkx_nodes_df["properties"],  # .map(literal_eval)
             ],
             axis=1,
         ).itertuples(index=False, name=None)
     )
     return networkx_graph
+
+
+def pipeline(file_path_nodes, file_path_edges):
+    # Task 1. Create data structures for the internal representation
+    nodes_df, edges_df = create_dataframes(file_path_nodes, file_path_edges)
+
+    # Task 2. Create a NetworkX graph based on the internal representation
+    # Dictionaries to change the name of columns to maintain compatibility with Networkx
+    columns_names_nodes = {"UniProt ID": "source", "properties": "properties"}
+
+    columns_names_edges = {
+        "Source ID": "source",
+        "Target ID": "target",
+        "properties": "properties",
+    }
+
+    graph = networkx_graph_from_pandas(
+        networkx_nodes_df=df_to_networkx_nodes(
+            nodes_df,
+            columns_to_keep_intact=["UniProt ID", "properties"],
+            column_names_dict=columns_names_nodes,
+        ),
+        networkx_edges_df=df_to_networkx_edges(
+            edges_df,
+            columns_to_keep_intact=["Source ID", "Target ID", "properties"],
+            column_names_dict=columns_names_edges,
+        ),
+        graph_type=nx.DiGraph(),
+    )
+
+    return nodes_df, edges_df, graph
 
 
 # =====================================================================
@@ -228,64 +259,18 @@ if __name__ == "__main__":
         if os.path.exists(memray_file_path_results):
             os.remove(memray_file_path_results)
 
-        with memray.Tracker(memray_file_path_results):
-            # Task 1. Create data structures for the internal representation
-            nodes_df, edges_df = create_dataframes(file_path_nodes, file_path_edges)
-
-            # Task 2. Create a NetworkX graph based on the internal representation
-            # Dictionaries to change the name of columns to maintain compatibility with Networkx
-            columns_names_nodes = {"UniProt ID": "source", "properties": "properties"}
-
-            columns_names_edges = {
-                "Source ID": "source",
-                "Target ID": "target",
-                "properties": "properties",
-            }
-
-            graph = networkx_graph_from_pandas(
-                networkx_nodes_df=df_to_networkx_nodes(
-                    nodes_df,
-                    columns_to_keep_intact=["UniProt ID", "properties"],
-                    column_names_dict=columns_names_nodes,
-                ),
-                networkx_edges_df=df_to_networkx_edges(
-                    edges_df,
-                    columns_to_keep_intact=["Source ID", "Target ID", "properties"],
-                    column_names_dict=columns_names_edges,
-                ),
-                graph_type=nx.DiGraph(),
-            )
+        with MemrayTracker(memray_file_path_results):
+            nodes_df, edges_df, graph = pipeline(
+                file_path_nodes, file_path_edges
+            )  # <-- Our code under test
     else:
         # Create a cProfiler
-        profiler = cProfile.Profile()
+        profiler = Profile()
         profiler.enable()
 
-        # Task 1. Create data structures for the internal representation
-        nodes_df, edges_df = create_dataframes(file_path_nodes, file_path_edges)
-
-        # Task 2. Create a NetworkX graph based on the internal representation
-        # Dictionaries to change the name of columns to maintain compatibility with Networkx
-        columns_names_nodes = {"UniProt ID": "source", "properties": "properties"}
-
-        columns_names_edges = {
-            "Source ID": "source",
-            "Target ID": "target",
-            "properties": "properties",
-        }
-
-        graph = networkx_graph_from_pandas(
-            networkx_nodes_df=df_to_networkx_nodes(
-                nodes_df,
-                columns_to_keep_intact=["UniProt ID", "properties"],
-                column_names_dict=columns_names_nodes,
-            ),
-            networkx_edges_df=df_to_networkx_edges(
-                edges_df,
-                columns_to_keep_intact=["Source ID", "Target ID", "properties"],
-                column_names_dict=columns_names_edges,
-            ),
-            graph_type=nx.DiGraph(),
-        )
+        nodes_df, edges_df, graph = pipeline(
+            file_path_nodes, file_path_edges
+        )  # <-- Our code under test
 
         profiler.disable()
 

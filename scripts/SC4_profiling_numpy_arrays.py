@@ -1,13 +1,13 @@
-import ast
-import cProfile
-import csv
-import numpy as np
 import os
 import platform
 import pstats
+from ast import literal_eval
+from cProfile import Profile
+from csv import reader as csv_reader
 
-import memray
 import networkx as nx
+import numpy as np
+from memray import Tracker as memray_tracker
 from pympler import asizeof
 from tabulate import tabulate
 
@@ -100,7 +100,7 @@ def example_info_networkx_graph(graph):
 # =====================================================================
 def load_csv_generator(file_path, header=True):
     with open(file_path, "r") as file:
-        reader = csv.reader(file)
+        reader = csv_reader(file)
         if header:
             next(reader)
         for row in reader:
@@ -129,7 +129,7 @@ def to_networkx_nodes_format(nodes_iterable, mapping_properties=True):
         # Desired format
         #  (node id, properties as dict)
 
-        properties = ast.literal_eval(properties)
+        properties = literal_eval(properties)
 
         if mapping_properties:
             properties["node_label"] = node_label
@@ -145,7 +145,7 @@ def to_networkx_edges_format(edges_iterable, mapping_properties=True):
         # Desired format
         #  (source (edge id), target (edge id), properties as dict)
 
-        properties = ast.literal_eval(properties)
+        properties = literal_eval(properties)
 
         if mapping_properties:
             properties["edge_id"] = edge_id
@@ -222,14 +222,14 @@ if __name__ == "__main__":
         if os.path.exists(memray_file_path_results):
             os.remove(memray_file_path_results)
 
-        with memray.Tracker(memray_file_path_results):
+        with memray_tracker(memray_file_path_results):
             nodes_nparray, edges_nparray, graph = pipeline(
                 file_path_nodes, file_path_edges
             )  # <-- Our code under test
 
     else:
         # Create a cProfiler
-        profiler = cProfile.Profile()
+        profiler = Profile()
         profiler.enable()
 
         nodes_nparray, edges_nparray, graph = pipeline(

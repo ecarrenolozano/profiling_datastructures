@@ -1,16 +1,16 @@
-import ast
-import cProfile
-import csv
 import os
 import platform
 import pstats
+from ast import literal_eval
 from collections import defaultdict
+from cProfile import Profile
+from csv import reader as csv_reader
 from itertools import islice
 from json import dumps
 
-import memray
 import networkx as nx
 import pandas as pd
+from memray import Tracker as memray_tracker
 from pympler import asizeof
 from tabulate import tabulate
 
@@ -103,7 +103,7 @@ def example_info_networkx_graph(graph):
 # =====================================================================
 def load_csv_generator(file_path, header=True):
     with open(file_path, "r") as file:
-        reader = csv.reader(file)
+        reader = csv_reader(file)
         if header:
             next(reader)
         for row in reader:
@@ -118,7 +118,7 @@ def to_networkx_nodes_format(nodes_iterable, mapping_properties=True):
         # Desired format
         #  (node id, properties as dict)
 
-        properties = ast.literal_eval(properties)
+        properties = literal_eval(properties)
 
         if mapping_properties:
             properties["node_label"] = node_label
@@ -134,7 +134,7 @@ def to_networkx_edges_format(edges_iterable, mapping_properties=True):
         # Desired format
         #  (source (edge id), target (edge id), properties as dict)
 
-        properties = ast.literal_eval(properties)
+        properties = literal_eval(properties)
 
         if mapping_properties:
             properties["edge_id"] = edge_id
@@ -183,6 +183,23 @@ def networkx_graph_from_dicts(nodes_dict, adjacency_map, graph_type=nx.DiGraph()
     return networkx_graph
 
 
+def pipeline(file_path_nodes, file_path_edges):
+    # Task 1. Create data structures for the internal representation
+    nodes_dict, edges_adjacency_map = create_dictionaries(
+        file_path_nodes, file_path_edges
+    )
+
+    # Task 2. Create a NetworkX graph based on the internal representation
+    # Dictionaries to change the name of columns to maintain compatibility with Networkx
+    graph = networkx_graph_from_dicts(
+        nodes_dict=nodes_dict,
+        adjacency_map=edges_adjacency_map,
+        graph_type=nx.DiGraph(),
+    )
+
+    return nodes_dict, edges_adjacency_map, graph
+
+
 # =====================================================================
 # ==================            MAIN Function        ==================
 # =====================================================================
@@ -220,36 +237,18 @@ if __name__ == "__main__":
         if os.path.exists(memray_file_path_results):
             os.remove(memray_file_path_results)
 
-        with memray.Tracker(memray_file_path_results):
-            # Task 1. Create data structures for the internal representation
-            nodes_dict, edges_adjacency_map = create_dictionaries(
+        with memray_tracker(memray_file_path_results):
+            nodes_dict, edges_adjacency_map, graph = pipeline(
                 file_path_nodes, file_path_edges
-            )
-
-            # Task 2. Create a NetworkX graph based on the internal representation
-            # Dictionaries to change the name of columns to maintain compatibility with Networkx
-            graph = networkx_graph_from_dicts(
-                nodes_dict=nodes_dict,
-                adjacency_map=edges_adjacency_map,
-                graph_type=nx.DiGraph(),
-            )
+            )  # <-- Our code under test
     else:
         # Create a cProfiler
-        profiler = cProfile.Profile()
+        profiler = Profile()
         profiler.enable()
 
-        # Task 1. Create data structures for the internal representation
-        nodes_dict, edges_adjacency_map = create_dictionaries(
+        nodes_dict, edges_adjacency_map, graph = pipeline(
             file_path_nodes, file_path_edges
-        )
-
-        # Task 2. Create a NetworkX graph based on the internal representation
-        # Dictionaries to change the name of columns to maintain compatibility with Networkx
-        graph = networkx_graph_from_dicts(
-            nodes_dict=nodes_dict,
-            adjacency_map=edges_adjacency_map,
-            graph_type=nx.DiGraph(),
-        )
+        )  # <-- Our code under test
 
         profiler.disable()
 

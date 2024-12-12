@@ -1,12 +1,12 @@
-import ast
-import cProfile
-import csv
 import os
 import platform
 import pstats
+from ast import literal_eval
+from cProfile import Profile
+from csv import reader as csv_reader
 
-import memray
 import networkx as nx
+from memray import Tracker as MemrayTracker
 from pympler import asizeof
 from tabulate import tabulate
 
@@ -99,7 +99,7 @@ def example_info_networkx_graph(graph):
 # =====================================================================
 def load_csv_generator(file_path, header=True):
     with open(file_path, "r") as file:
-        reader = csv.reader(file)
+        reader = csv_reader(file)
         if header:
             next(reader)
         for row in reader:
@@ -125,7 +125,7 @@ def to_networkx_nodes_format(nodes_iterable, mapping_properties=True):
         # Desired format
         #  (node id, properties as dict)
 
-        properties = ast.literal_eval(properties)
+        properties = literal_eval(properties)
 
         if mapping_properties:
             properties["node_label"] = node_label
@@ -141,7 +141,7 @@ def to_networkx_edges_format(edges_iterable, mapping_properties=True):
         # Desired format
         #  (source (edge id), target (edge id), properties as dict)
 
-        properties = ast.literal_eval(properties)
+        properties = literal_eval(properties)
 
         if mapping_properties:
             properties["edge_id"] = edge_id
@@ -165,6 +165,22 @@ def networkx_graph_from_lists(nodes_iterable, edges_iterable, graph_type=nx.DiGr
     networkx_graph.add_nodes_from(nodes_iterable)
 
     return networkx_graph
+
+
+def pipeline(file_path_nodes, file_path_edges):
+    # Task 1. Create data structures for the internal representation
+    nodes_list, edges_list = create_lists(
+        file_path_nodes, file_path_edges, header_nodes=True, header_edges=True
+    )
+
+    # Task 2. Create a NetworkX graph based on the internal representation
+    graph = networkx_graph_from_lists(
+        nodes_iterable=to_networkx_nodes_format(nodes_list),
+        edges_iterable=to_networkx_edges_format(edges_list),
+        graph_type=nx.DiGraph(),
+    )
+
+    return nodes_list, edges_list, graph
 
 
 # =====================================================================
@@ -204,33 +220,18 @@ if __name__ == "__main__":
         if os.path.exists(memray_file_path_results):
             os.remove(memray_file_path_results)
 
-        with memray.Tracker(memray_file_path_results):
-            # Task 1. Create data structures for the internal representation
-            nodes_list, edges_list = create_lists(
-                file_path_nodes, file_path_edges, header_nodes=True, header_edges=True
-            )
-            # Task 2. Create a NetworkX graph based on the internal representation
-            graph = networkx_graph_from_lists(
-                nodes_iterable=to_networkx_nodes_format(nodes_list),
-                edges_iterable=to_networkx_edges_format(edges_list),
-                graph_type=nx.DiGraph(),
-            )
+        with MemrayTracker(memray_file_path_results):
+            nodes_list, edges_list, graph = pipeline(
+                file_path_nodes, file_path_edges
+            )  # <-- Our code under test
     else:
         # Create a cProfiler
-        profiler = cProfile.Profile()
+        profiler = Profile()
         profiler.enable()
 
-        # Task 1. Create data structures for the internal representation
-        nodes_list, edges_list = create_lists(
-            file_path_nodes, file_path_edges, header_nodes=True, header_edges=True
-        )
-
-        # Task 2. Create a NetworkX graph based on the internal representation
-        graph = networkx_graph_from_lists(
-            nodes_iterable=to_networkx_nodes_format(nodes_list),
-            edges_iterable=to_networkx_edges_format(edges_list),
-            graph_type=nx.DiGraph(),
-        )
+        nodes_list, edges_list, graph = pipeline(
+            file_path_nodes, file_path_edges
+        )  # <-- Our code under test
 
         profiler.disable()
 
