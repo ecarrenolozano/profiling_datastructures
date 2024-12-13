@@ -1,3 +1,4 @@
+import logging
 import os
 import platform
 import pstats
@@ -21,6 +22,33 @@ def clear_console():
         os.system("clear")  # Unix/Linux/MacOS
 
 
+def set_logger(log_file_path):
+    # Create a logger
+    logger = logging.getLogger("my_logger")
+    logger.setLevel(logging.DEBUG)
+
+    # Create handlers
+    console_handler = logging.StreamHandler()  # This will print to the console
+    file_handler = logging.FileHandler(log_file_path, mode="w")  # This will log to a file
+
+    # Set log levels for each handler
+    console_handler.setLevel(logging.INFO)  # Print only INFO and higher to the console
+    file_handler.setLevel(logging.DEBUG)  # Log DEBUG and higher to the file
+
+    # Create formatter
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+
+    # Attach formatter to handlers
+    # console_handler.setFormatter(formatter)
+    file_handler.setFormatter(formatter)
+
+    # Add handlers to the logger
+    logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
+
+    return logger
+
+
 def print_metadata(file_path_nodes, file_path_edges):
     print("--------------------------------------------------------------------")
     print("------------------       Profiling Pipeline       ------------------")
@@ -35,26 +63,26 @@ def print_metadata(file_path_nodes, file_path_edges):
 
 
 def profile_objects_pympler(**kwargs):
-    sizes_mebibytes = []
+    sizes_megabytes = []
     for object in kwargs.keys():
         size_summary = asizeof.asized(kwargs[object], detail=0).format()
 
-        total_size_mebibytes = float(size_summary.split(" ")[-2].split("=")[1])
-        total_size_mebibytes /= 1024**2
+        total_size_megabytes = float(size_summary.split(" ")[-2].split("=")[1])
+        total_size_megabytes /= 1e6
 
-        flat_size_mebibytes = float(size_summary.split(" ")[-1].split("=")[1])
-        flat_size_mebibytes /= 1024**2
+        flat_size_megabytes = float(size_summary.split(" ")[-1].split("=")[1])
+        flat_size_megabytes /= 1e6
 
-        sizes_mebibytes.append(
+        sizes_megabytes.append(
             [
                 object,
                 type(kwargs[object]),
-                total_size_mebibytes,
-                flat_size_mebibytes,
+                total_size_megabytes,
+                flat_size_megabytes,
             ]
         )
 
-    return sizes_mebibytes
+    return sizes_megabytes
 
 
 def print_pympler_results(results):
@@ -64,8 +92,8 @@ def print_pympler_results(results):
             headers=[
                 "Variable",
                 "object",
-                "Total Size [MiB]",
-                "Flat Size [MiB]",
+                "Total Size [MB]",
+                "Flat Size [MB]",
             ],
         )
     )
@@ -75,6 +103,11 @@ def pympler_profiler(**kwargs):
     print("\nProfiling objects with Pympler...\n")
     results_pympler = profile_objects_pympler(**kwargs)
     print_pympler_results(results_pympler)
+
+
+def info_networkx_graph(graph):
+    logger.info("Number of nodes (NetworkX graph): {}".format(graph.number_of_nodes()))
+    logger.info("Number of edges (NetworkX graph): {}".format(graph.number_of_edges()))
 
 
 def example_info_networkx_graph(graph):
@@ -197,19 +230,25 @@ if __name__ == "__main__":
     FILE_PATH_RESULTS = "../data_results"
 
     # MODIFY THIS: Dataset's name
-    filename_nodes = "dataset_30000_nodes_proteins.csv"
-    filename_edges = "dataset_30000_edges_interactions.csv"
+    filename_nodes = "dataset_24000_nodes_proteins.csv"
+    filename_edges = "dataset_24000_edges_interactions.csv"
 
     # MODIFY THIS: File paths
     file_path_nodes = os.path.join(FILE_PATH_DATASETS, filename_nodes)
     file_path_edges = os.path.join(FILE_PATH_DATASETS, filename_edges)
+
+    log_file = filename_edges.split("_")[1]
+    log_file = "log" + log_file + "_lists.log"
+    log_file_path = os.path.join(FILE_PATH_RESULTS, log_file)
+
+    logger = set_logger(log_file_path)
 
     # ==============       DO NOT MODIFY THE REST OF THE CODE      ================
     # print metadata related to this script
     print_metadata(file_path_nodes, file_path_edges)
 
     # Define if you will profile the code with memray
-    memray_is_used = True
+    memray_is_used = False
 
     ###################     CODE UNDER TEST (START)     ########################
     if memray_is_used:
@@ -242,13 +281,23 @@ if __name__ == "__main__":
 
         # ==============       MEMORY STATS
         # IMPORTANT: Comment the following two lines if profile with Memray
-        print("======   Memory profile")
-        pympler_profiler(nodes=nodes_list, edges=edges_list, graph=graph, integer=10)
+        # print("======   Memory profile")
+        # pympler_profiler(nodes=nodes_list, edges=edges_list, graph=graph, integer=10)
+
+        # ==============       DATA STATS
+        print("\n======   Data stats")
+        print("Number of nodes(list): {}".format(len(nodes_list)))
+        print("Number of edges(list): {}".format(len(edges_list)))
+
+        info_networkx_graph(graph)
 
         print("\nExample raw nodes:\n\t{}".format(nodes_list[0:1]))
         print("Example raw edges:\n\t{}".format(edges_list[0:1]))
 
         example_info_networkx_graph(graph)
+
+        print("NXEdges: {}".format(graph.number_of_edges()))
+        print("NXNodes: {}".format(graph.number_of_nodes()))
 
         print("\nEnd of report!!!")
     ####################     CODE UNDER TEST (END)      ########################

@@ -1,3 +1,5 @@
+import io
+import logging
 import os
 import platform
 import pstats
@@ -7,6 +9,7 @@ from cProfile import Profile
 from csv import reader as csv_reader
 from itertools import islice
 from json import dumps
+from json import loads
 
 import networkx as nx
 import pandas as pd
@@ -25,87 +28,124 @@ def clear_console():
         os.system("clear")  # Unix/Linux/MacOS
 
 
+def set_logger(log_file_path):
+    # Create a logger
+    logger = logging.getLogger("my_logger")
+    logger.setLevel(logging.DEBUG)
+
+    # Create handlers
+    console_handler = logging.StreamHandler()  # This will print to the console
+    file_handler = logging.FileHandler(log_file_path, mode="w")  # This will log to a file
+
+    # Set log levels for each handler
+    console_handler.setLevel(logging.INFO)  # Print only INFO and higher to the console
+    file_handler.setLevel(logging.DEBUG)  # Log DEBUG and higher to the file
+
+    # Create formatter
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+
+    # Attach formatter to handlers
+    # console_handler.setFormatter(formatter)
+    file_handler.setFormatter(formatter)
+
+    # Add handlers to the logger
+    logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
+
+    return logger
+
+
 def print_metadata(file_path_nodes, file_path_edges):
-    print("--------------------------------------------------------------------")
-    print("------------------       Profiling Pipeline       ------------------")
-    print("--------------------------------------------------------------------")
-    print("Metadata")
-    print("\tScript's name:\t{}".format(os.path.basename(__file__)))
-    print(
-        "\tData for nodes: {}\n\tData for edges: {}".format(
-            file_path_nodes, file_path_edges
-        )
-    )
+    logger.info("--------------------------------------------------------------------")
+    logger.info("------------------       Profiling Pipeline       ------------------")
+    logger.info("--------------------------------------------------------------------")
+    logger.info("Metadata")
+    logger.info("\tScript's name:\t{}".format(os.path.basename(__file__)))
+    logger.info("\tData for nodes: {}".format(file_path_nodes))
+    logger.info("\tData for edges: {}".format(file_path_edges))
 
 
 def profile_objects_pympler(**kwargs):
-    sizes_mebibytes = []
+    sizes_megabytes = []
     for object in kwargs.keys():
+        print(asizeof.asized(kwargs[object], detail=0).format())
         size_summary = asizeof.asized(kwargs[object], detail=0).format()
 
-        total_size_mebibytes = float(size_summary.split(" ")[-2].split("=")[1])
-        total_size_mebibytes /= 1024**2
+        total_size_megabytes = float(size_summary.split(" ")[-2].split("=")[1])
+        total_size_megabytes /= 1000**2
 
-        flat_size_mebibytes = float(size_summary.split(" ")[-1].split("=")[1])
-        flat_size_mebibytes /= 1024**2
+        flat_size_megabytes = float(size_summary.split(" ")[-1].split("=")[1])
+        flat_size_megabytes /= 1000**2
 
-        sizes_mebibytes.append(
+        print(f"--->{(total_size_megabytes, flat_size_megabytes)}")
+
+        sizes_megabytes.append(
             [
                 object,
                 type(kwargs[object]),
-                total_size_mebibytes,
-                flat_size_mebibytes,
+                total_size_megabytes,
+                flat_size_megabytes,
             ]
         )
 
-    return sizes_mebibytes
+    return sizes_megabytes
 
 
 def print_pympler_results(results):
-    print(
-        tabulate(
+    logger.info(
+        "size of variables: \n"
+        + tabulate(
             results,
             headers=[
                 "Variable",
                 "object",
-                "Total Size [MiB]",
-                "Flat Size [MiB]",
+                "Total Size [MB]",
+                "Flat Size [MB]",
             ],
+            tablefmt="grid",
         )
     )
 
 
 def pympler_profiler(**kwargs):
-    print("\nProfiling objects with Pympler...\n")
+    logger.info("Profiling objects with Pympler...")
     results_pympler = profile_objects_pympler(**kwargs)
     print_pympler_results(results_pympler)
 
 
+def info_networkx_graph(graph):
+    logger.info("Number of nodes (NetworkX graph): {}".format(graph.number_of_nodes()))
+    logger.info("Number of edges (NetworkX graph): {}".format(graph.number_of_edges()))
+
+
 def example_info_networkx_graph(graph):
     limit = 2
-    print("\nExample NetworkX nodes:")
+    print("\n")
+    logger.info("Example NetworkX nodes:")
     for index, node in enumerate(graph.nodes(data=True)):
         if index == limit:
             break
-        print(node)
+        logger.info(node)
 
-    print("\nExample NetworkX edges:")
+    print("\n")
+    logger.info("Example NetworkX edges:")
     for index, edge in enumerate(graph.edges(data=True)):
         if index == limit:
             break
-        print(edge)
+        logger.info(edge)
 
-    print("Graph size: {}".format(graph.size()))
+    logger.info("Graph size: {}".format(graph.size()))
 
 
 # =====================================================================
 # ==================       Functions Pipeline        ==================
 # =====================================================================
 def load_csv_generator(file_path, header=True):
-    with open(file_path, "r") as file:
+    with open(file_path, "r", encoding="utf8") as file:
         reader = csv_reader(file)
         if header:
             next(reader)
+            header = False
         for row in reader:
             yield tuple(row)
 
@@ -133,8 +173,10 @@ def to_networkx_edges_format(edges_iterable, mapping_properties=True):
 
         # Desired format
         #  (source (edge id), target (edge id), properties as dict)
-
-        properties = literal_eval(properties)
+        try:
+            properties = literal_eval(properties)
+        except:
+            print("something wrong")
 
         if mapping_properties:
             properties["edge_id"] = edge_id
@@ -162,15 +204,18 @@ def create_adjacency_map(generator_edges):
 
 
 def create_dictionaries(file_path_nodes, file_path_edges):
-    nodes_ds = load_csv_generator(file_path_nodes, header=True)
-    nodes_ds = to_networkx_nodes_format(nodes_ds)
-    nodes_ds = generate_nodes_dict(nodes_ds)
+    nodes_ds_input = load_csv_generator(file_path_nodes, header=True)
+    nodes_ds_gen1 = to_networkx_nodes_format(nodes_ds_input)
+    nodes_ds_gen2 = generate_nodes_dict(nodes_ds_gen1)
 
-    edges_ds = load_csv_generator(file_path_edges, header=True)
-    edges_ds = to_networkx_edges_format(edges_ds)
-    edges_ds = create_adjacency_map(edges_ds)
+    edges_ds_input = load_csv_generator(file_path_edges, header=True)
+    edges_ds_gen1 = to_networkx_edges_format(edges_ds_input)
+    edges_ds_gen2 = create_adjacency_map(edges_ds_gen1)
 
-    return nodes_ds, edges_ds
+    nodes_ds_output = nodes_ds_gen2
+    edges_ds_output = edges_ds_gen2
+
+    return nodes_ds_output, edges_ds_output
 
 
 def networkx_graph_from_dicts(nodes_dict, adjacency_map, graph_type=nx.DiGraph()):
@@ -214,19 +259,25 @@ if __name__ == "__main__":
     FILE_PATH_RESULTS = "../data_results"
 
     # MODIFY THIS: Dataset's name
-    filename_nodes = "dataset_3000_nodes_proteins.csv"
-    filename_edges = "dataset_3000_edges_interactions.csv"
+    filename_nodes = "dataset_300_nodes_proteins.csv"
+    filename_edges = "dataset_300_edges_interactions.csv"
 
     # MODIFY THIS: File paths
     file_path_nodes = os.path.join(FILE_PATH_DATASETS, filename_nodes)
     file_path_edges = os.path.join(FILE_PATH_DATASETS, filename_edges)
+
+    log_file = filename_edges.split("_")[1]
+    log_file = "log" + log_file + "_adjacency_map.log"
+    log_file_path = os.path.join(FILE_PATH_RESULTS, log_file)
+
+    logger = set_logger(log_file_path)
 
     # ==============       DO NOT MODIFY THE REST OF THE CODE      ================
     # print metadata related to this script
     print_metadata(file_path_nodes, file_path_edges)
 
     # Define if you will profile the code with memray
-    memray_is_used = False
+    memray_is_used = True
 
     ###################     CODE UNDER TEST (START)     ########################
     if memray_is_used:
@@ -253,26 +304,40 @@ if __name__ == "__main__":
         profiler.disable()
 
         # ==============       TIME STATS
-        print("\n======   Time profile")
-        stats = pstats.Stats(profiler).sort_stats("cumtime")
+        stream = io.StringIO()
+        print("\n")
+        logger.info("======   Time profile")
+        stats = pstats.Stats(profiler, stream=stream).sort_stats("cumtime")
         stats.print_stats(30)
+        logger.info(stream.getvalue())
 
         # ==============       MEMORY STATS
-        print("======   Memory profile")
+        logger.info("======   Memory profile")
         pympler_profiler(
             nodes=nodes_dict, edges=edges_adjacency_map, graph=graph, integer=10
         )
 
-        # print("\nExample raw node:")
-        # slice_nodes = dict(islice(nodes_dict.items(), 1))
-        # print(dumps(slice_nodes, indent=4))
-
-        # print("Example raw edges:")
-        # slice_edges = dict(islice(edges_adjacency_map.items(), 1))
-        # print(dumps(slice_edges, indent=4))
+        # ==============       DATA STATS
+        print("\n")
+        logger.info("======   Data stats")
+        logger.info("Number of nodes (dict): {}".format(len(nodes_dict.keys())))
+        edge_count = 0
+        for node, neighbors in edges_adjacency_map.items():
+            edge_count += len(neighbors)
+        logger.info("Number of edges (dict): {}".format(edge_count))
+        info_networkx_graph(graph)
 
         example_info_networkx_graph(graph)
 
-        print("\nEnd of report!!!")
+        # logger.info("\nExample raw node:")
+        # slice_nodes = dict(islice(nodes_dict.items(), 1))
+        # logger.info(dumps(slice_nodes, indent=4))
+
+        # logger.info("Example raw edges:")
+        # slice_edges = dict(islice(edges_adjacency_map.items(), 1))
+        # logger.info(dumps(slice_edges, indent=4))
+
+        print("\n")
+        logger.info("End of report!!!")
 
     ####################     CODE UNDER TEST (END)      ########################
