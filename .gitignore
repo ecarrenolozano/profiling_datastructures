@@ -1,0 +1,31 @@
+# Ignore everything in the folder `data_examples`, including subdirectories
+data_examples/*
+# Except these two specific files
+!data_examples/dataset_30_edges_interactions.csv
+!data_examples/dataset_30_nodes_proteins.csv
+!data_examples/dataset_dummy2_edges.csv
+!data_examples/dataset_dummy2_nodes.csv
+!data_examples/dataset_dummy_edges.csv
+!data_examples/dataset_dummy_nodes.csv
+
+# Ignore everything in the folder `data_results`, including subdirectories
+data_results/*
+# Except this specific file
+!data_results/Results_experimentation
+
+# Ignore everything in the folder `logs`, including subdirectories
+logs/*
+
+# Ignore .ipynb checkpoints
+notebooks/.ipynb_checkpoints/*
+
+# Ignore caches caches
+tests/__pycache__/*
+.pytest_cache
+.mypy_cache
+
+# Ignore VS Code local configurations
+.vscode/settings.json
+
+# Notebooks
+notebooks/NB3_networkx_pandas_dataframe-1733750704571.ipynb
